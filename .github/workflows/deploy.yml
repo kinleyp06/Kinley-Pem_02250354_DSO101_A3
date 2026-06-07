@@ -31,9 +31,14 @@ jobs:
           context: .
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/todo-app:latest
+          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/todo-app:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/todo-app:buildcache,mode=max
 
       # 5. Deploy to Render.com
       - name: Trigger Render Deployment
         run: |
-          curl -X POST ${{ secrets.RENDER_DEPLOY_WEBHOOK }}
+          curl -X POST "${{ secrets.RENDER_DEPLOY_WEBHOOK }}" \
+            -H "Content-Type: application/json" \
+            -d '{"deploy_key":"${{ secrets.RENDER_DEPLOY_WEBHOOK }}"}'
         if: success()
+        continue-on-error: true
